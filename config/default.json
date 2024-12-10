@@ -1,0 +1,10 @@
+{
+	"server": {
+		"port": 4242,
+		"host": "localhost"
+	},
+	"timer": {
+		"max_idle_time": 20000,
+		"idle_check_interval": 5000
+	}
+}
