@@ -1,8 +1,12 @@
 var backend = require("./sharedb_singleton").sharedb;
 const config = require('config');
+const axios = require('axios');
 
 // 定义每个文档的最大空闲时间（以毫秒为单位）
 const MAX_IDLE_TIME = config.get('timer.max_idle_time');
+
+// 文档服务地址
+const document_service_url = config.get('document_service_url');
 
 // 存储每个文档对象及其最后活动时间
 let docActivityMap = new Map();
@@ -51,7 +55,21 @@ function checkForIdleDocuments() {
 function persisitDocument(doc) {
 	var docCode = doc.id;
 	var content = doc.data.content;
-	//TODO 调用远程接口
+
+	axios.post(document_service_url, {
+		documentId: docCode,
+		code: content
+	}, {
+		headers: {	// *手动发放的永久token，id为-4242
+			'Authorization': `Bearer ${config.get('jwt_token')}`
+		}
+	})
+		.then(response => {
+			console.log('Document saved successfully.');
+		})
+		.catch(error => {
+			console.error('Error saving document:', error);
+		});
 }
 
 // 导出方法

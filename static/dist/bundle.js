@@ -1,22 +1,31 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (global){(function (){
-// client.js
 const ReconnectingWebSocket = require('reconnecting-websocket');
 const ShareDB = require('sharedb/lib/client');
 
-// 创建 WebSocket 连接
-const socket = new ReconnectingWebSocket('ws://' + window.location.host, [], {
-	maxEnqueuedMessages: 0
-});
-const connection = new ShareDB.Connection(socket);
+let connection;
+let doc;
 
-// 创建本地文档实例，映射到 'shared-doc' 集合，文档 ID 为 docCode
-const docCode = 'counter'; // 这里假设你的文档 ID 是 'counter'
-const doc = connection.get('shared-doc', docCode);
+function connectToDocument() {
+	const docName = document.querySelector('#docName').value;
+	if (!docName) {
+		alert('Please enter a document name.');
+		return;
+	}
 
-// 获取文档的初始值并订阅更改
-doc.subscribe(showContent);
-doc.on('op', showContent);
+	// 创建 WebSocket 连接
+	const socket = new ReconnectingWebSocket('ws://' + window.location.host, [], {
+		maxEnqueuedMessages: 0
+	});
+	connection = new ShareDB.Connection(socket);
+
+	// 创建本地文档实例，映射到 'shared-doc' 集合，文档 ID 为 docName
+	doc = connection.get('shared-doc', docName);
+
+	// 获取文档的初始值并订阅更改
+	doc.subscribe(showContent);
+	doc.on('op', showContent);
+}
 
 function showContent() {
 	const editor = document.querySelector('#editor');
@@ -33,6 +42,7 @@ function updateContent() {
 }
 
 // 曝露到全局，允许 HTML 中访问
+global.connectToDocument = connectToDocument;
 global.updateContent = updateContent;
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"reconnecting-websocket":47,"sharedb/lib/client":51}],2:[function(require,module,exports){

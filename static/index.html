@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- ! just for testing, not used in the project-->
 
 <head>
     <meta charset="UTF-8">
@@ -10,6 +9,11 @@
 
 <body>
     <h1>Shared Document Content</h1>
+    <div>
+        <label for="docName">Document Name:</label>
+        <input type="text" id="docName" />
+        <button onclick="connectToDocument()">Connect</button>
+    </div>
     <div>
         <textarea id="editor" rows="10" cols="50">Loading...</textarea>
         <button onclick="updateContent()">Save Content</button>

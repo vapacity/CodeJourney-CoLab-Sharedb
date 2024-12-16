@@ -24,7 +24,7 @@ app.use(cors());
 app.post('/share/opendocument', (req, res) => {
 	const { docCode, content } = req.body;
 
-	if (!docCode || !content) {
+	if (!docCode || content === null) {
 		return res.status(400).send({ message: 'docCode and content are required' });
 	}
 
