@@ -30,7 +30,7 @@ function connectToDocument() {
 function showContent() {
 	const editor = document.querySelector('#editor');
 	if (doc.data && doc.data.content !== editor.value) {
-		editor.value = doc.data.content || 'No content';
+		editor.value = doc.data || 'No content';
 	}
 }
 

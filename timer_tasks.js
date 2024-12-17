@@ -57,7 +57,7 @@ function persisitDocument(doc) {
 	var content = doc.data.content;
 
 	axios.post(document_service_url, {
-		documentId: docCode,
+		documentCode: docCode,
 		code: content
 	}, {
 		headers: {	// *手动发放的永久token，id为-4242
