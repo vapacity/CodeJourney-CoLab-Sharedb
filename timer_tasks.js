@@ -36,7 +36,7 @@ function checkForIdleDocuments() {
 			console.log(`Document with ID ${doc.id} has been idle for too long, closing...`);
 			doc.unsubscribe();
 			// *持久化文档
-			persisitDocument(doc);
+			persistDocument(doc);
 			// 释放文档资源
 			doc.del(function (err) {
 				// *删除活动记录
@@ -52,7 +52,7 @@ function checkForIdleDocuments() {
 }
 
 // 调用远程接口保存文档
-function persisitDocument(doc) {
+function persistDocument(doc) {
 	var docCode = doc.id;
 	var content = doc.data.content;
 
@@ -72,8 +72,18 @@ function persisitDocument(doc) {
 		});
 }
 
+// 保存所有文档
+function persistAllDocument() {
+	console.log("Persisting all documents...");
+	// 遍历所有文档，持久化
+	docActivityMap.forEach((lastActivity, doc) => {
+		persistDocument(doc);
+	});
+}
+
 // 导出方法
 module.exports = {
 	createDoc: createDoc,
 	checkForIdleDocuments: checkForIdleDocuments,
+	persistAllDocument: persistAllDocument
 }

@@ -5,7 +5,8 @@
 	},
 	"timer": {
 		"max_idle_time": 20000,
-		"idle_check_interval": 5000
+		"idle_check_interval": 5000,
+		"auto_save_interval": 10000
 	},
 	"document_service_url": "http://localhost:8048/document/savecontent",
 	"jwt_token": "eyJhbGciOiJIUzM4NCJ9.eyJpZCI6LTQyNDIsImV4cCI6MTczNDkyMDYzOH0.p7NuRuMMojSgDjztW_LAVlLyqLrGJTMZeDxbB3kW5J4ivhlXGYJEBTX6azVlxYoR"

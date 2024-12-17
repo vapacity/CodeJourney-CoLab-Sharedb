@@ -7,6 +7,7 @@ var cors = require('cors');
 const config = require('config');
 
 const IDLE_CHECK_INTERVAL = config.get('timer.idle_check_interval');
+const AUTO_SAVE_INTERVAL = config.get('timer.auto_save_interval');
 const port = config.get('server.port');
 
 var backend = require("./sharedb_singleton").sharedb;
@@ -39,6 +40,7 @@ app.post('/share/opendocument', (req, res) => {
 		if (doc.type === null) {
 			// 新建文档
 			doc.create({ content: content, users: {} }, function (err) {
+				console.log('doc created:', doc.data);
 				if (err) {
 					console.error('Error creating document:', err);
 					return res.status(500).send({ message: 'Error creating document', error: err });
@@ -66,7 +68,12 @@ wss.on('connection', function (ws) {
 // 定时检查所有文档
 setInterval(() => {
 	timer_functions.checkForIdleDocuments();  // 调用管理文档的检查方法
-}, IDLE_CHECK_INTERVAL);  // 每分钟检查一次
+}, IDLE_CHECK_INTERVAL);
+
+// 定时保存所有文档
+setInterval(() => {
+	timer_functions.persistAllDocument();
+}, AUTO_SAVE_INTERVAL);
 
 server.listen(port, () => {
 	console.log(`Server started on port ${port}`);
