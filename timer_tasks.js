@@ -55,7 +55,7 @@ function checkForIdleDocuments() {
 function persistDocument(doc) {
 	var docCode = doc.id;
 	var content = doc.data.content;
-
+	console.log('1111')
 	axios.post(document_service_url, {
 		documentCode: docCode,
 		code: content
@@ -65,11 +65,13 @@ function persistDocument(doc) {
 		}
 	})
 		.then(response => {
+			console.log(response.status);
 			console.log('Document saved successfully.');
 		})
 		.catch(error => {
 			console.error('Error saving document:', error);
 		});
+		console.log('11122221')
 }
 
 // 保存所有文档

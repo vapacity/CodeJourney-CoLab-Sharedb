@@ -23,38 +23,81 @@ app.use(cors());
 
 // POST /share/opendocument: 启动文档服务
 app.post('/share/opendocument', (req, res) => {
-	const { docCode, content } = req.body;
+    const { userId, docCode, content } = req.body;
 
-	if (!docCode || content === null) {
-		return res.status(400).send({ message: 'docCode and content are required' });
-	}
+    if (!userId || !docCode || content === null) {
+        return res.status(400).send({ message: 'userId, docCode and content are required' });
+    }
+	console.log("received")
+	console.log('userId:',userId);
+	console.log('docCode:',docCode);
+	console.log('content:',content,'\n');
+    var doc = connection.get("shared-doc", docCode);
 
-	var doc = connection.get("shared-doc", docCode);
+    doc.fetch(function (err) {
+        if (err) {
+            console.error('Error fetching document:', err);
+            return res.status(500).send({ message: 'Error fetching document', error: err });
+        }
 
-	doc.fetch(function (err) {
-		if (err) {
-			console.error('Error fetching document:', err);
-			return res.status(500).send({ message: 'Error fetching document', error: err });
-		}
+        if (doc.type === null) {
+            // 新建文档
+            doc.create({ content: content, users: { [userId]: true } }, function (err) {
+                if (err) {
+                    console.error('Error creating document:', err);
+                    return res.status(500).send({ message: 'Error creating document', error: err });
+                }
 
-		if (doc.type === null) {
-			// 新建文档
-			doc.create({ content: content, users: {} }, function (err) {
-				console.log('doc created:', doc.data);
-				if (err) {
-					console.error('Error creating document:', err);
-					return res.status(500).send({ message: 'Error creating document', error: err });
-				}
+                timer_functions.createDoc(doc);
+                res.send({ message: "Document created successfully", docCode });
+            });
+        } else {
+            // 如果文档已经存在，先删除该文档，然后再次尝试创建
+            console.log('Document already exists. Deleting and recreating...');
+            doc.del(function (deleteErr) {
+                if (deleteErr) {
+                    console.error('Error deleting document:', deleteErr);
+                    return res.status(500).send({ message: 'Error deleting document', error: deleteErr });
+                }
 
-				timer_functions.createDoc(doc);
+                // 再次尝试创建文档
+                doc.create({ content: content, users: { [userId]: true } }, function (createErr) {
+                    if (createErr) {
+                        console.error('Error creating document after deletion:', createErr);
+                        return res.status(500).send({ message: 'Error creating document after deletion', error: createErr });
+                    }
 
-				res.send({ message: "Document created successfully", docCode });
-			});
-		} else {
-			// 如果文档已经存在
-			res.send({ message: 'Document already exists', docCode });
-		}
-	});
+                    console.log('doc re - created:', doc.data);
+                    timer_functions.createDoc(doc);
+                    res.send({ message: "Document re - created successfully", docCode });
+                });
+            });
+        }
+    });
+});
+
+app.post('/share/getUsersByDocCode', (req, res) => {
+    const { docCode } = req.body;
+
+    if (!docCode) {
+        return res.status(400).send({ message: 'docCode is required' });
+    }
+
+    var doc = connection.get("shared-doc", docCode);
+
+    doc.fetch(function (err) {
+        if (err) {
+            console.error('Error fetching document:', err);
+            return res.status(500).send({ message: 'Error fetching document', error: err });
+        }
+
+        if (doc.type === null) {
+            return res.status(404).send({ message: 'Document not found' });
+        }
+
+        const users = Object.keys(doc.data.users);
+        res.send({ docCode, users });
+    });
 });
 
 var server = http.createServer(app);
